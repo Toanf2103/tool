@@ -1,0 +1,28 @@
+import axios from 'axios';
+
+const token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJodHRwOi8vc2NoZW1hcy54bWxzb2FwLm9yZy93cy8yMDA1LzA1L2lkZW50aXR5L2NsYWltcy9uYW1lIjoiZm5iIiwiaHR0cDovL3NjaGVtYXMueG1sc29hcC5vcmcvd3MvMjAwNS8wNS9pZGVudGl0eS9jbGFpbXMvZ2l2ZW5uYW1lIjoiZm5iIGZuYiIsImh0dHA6Ly9zY2hlbWFzLnhtbHNvYXAub3JnL3dzLzIwMDUvMDUvaWRlbnRpdHkvY2xhaW1zL25hbWVpZGVudGlmaWVyIjoiMDdlMjQ4NWQtOWM3OS00YzdmLWEzMmMtYzg0MmJmNDg0M2FmIiwiVXNlclBob25lIjoiMDE0Nzg5NjMyNSIsIkRCQ29ubmVjdGlvbiI6Ikx3NkF9dGtBNkEjd3s1VHJne3E7SCN7fD9TfHM_Zz9vI3w_SFlla1R7WXsjQVRnU1xcQWdEWWcjcnd8UjV4ezRQaCN3emdJP3d7PSNyI2l8aEhbe1x1MDA3RjNRayNnQWdre3x3M3c_I3I4e2xrbXo1aiMjbjdrZ3p6ajRrIiwiaHR0cDovL3NjaGVtYXMubWljcm9zb2Z0LmNvbS93cy8yMDA4LzA2L2lkZW50aXR5L2NsYWltcy9yb2xlIjpbIlFMTmhhblZpZW4iLCJRTFRob25nVGluRG9hbmhOZ2hpZXAiLCJRTE5oYUN1bmdDYXAiLCJYYWNOaGFuVmFHdWlEb24iLCJRTENvbmdUaHVjU2FuWHVhdCIsIlFMRG9hbmhOZ2hpZXAiLCJXYXJlaG91c2UiLCJYYWNOaGFuS2hhY2hUcmFIYW5nIiwiUHJvZHVjdCIsIktpZW1LZSIsIlFMU2FuUGhhbSIsIlFMRGFuaE11Y1NhblBoYW0iLCJRTENodW9uZ1RyaW5oS2h1eWVuTWFpIiwiQWRtaW4iLCJFdmVudCIsIlRhb1ZhWGFjTmhhbkRvbiIsIlZpZGVvIiwiUUxDdWFIYW5nIiwiUGljdHVyZSIsIkdpYW1HaWFUcnVjVGllcFRyZW5Eb25IYW5nIiwiQWN0aW9uQnlUaGVtc2VsZiIsIlFMQ2hpUGhpIiwiUUxTYW5YdWF0IiwiUUxLaG8iLCJRTENvbmdObyIsIkF1ZGlvIiwiQ2hvUGhlcEtoYWNoTm8iLCJEb2N1bWVudCIsIkNhaURhdFBodW9uZ1BoYXBYdWF0S2hvIiwiUUxOaGFwS2hvIiwiQ29uZmlnIiwiUUxOb2lTYW5YdWF0IiwiUUxDYXVIaW5oIiwiUUxYdWF0S2hvIiwiWGVtQmFvQ2FvIiwiUGhhbkJvTmhhblZpZW5DdWFIYW5nS2hvIiwiTWFuSGluaFBodUdpYW9UaWVwS2hhY2hIYW5nIiwiQ2h1eWVuQmFuIiwiR29wQmFuIiwiVGFjaEJhbiIsIkNoaWFCaWxsIiwiUXVhbkx5S2hhY2hIYW5nIiwiTmhhbk1vbiIsIkhpZW5UaGlNb25PcmRlciIsIkdpYW9Nb24iLCJUaGVvRG9pVHJhbmdUaGFpQ2hlQmllbiIsIkJhb0Nhb1BoYW5UaWNoVGhvaUdpYW5DaGVCaWVuIiwiTmhhcEtobyIsIlh1YXRLaG8iLCJUb25LaG8iLCJUcmFDdXVMaWNoU3VIYW5nSG9hIiwiQ29uZ1RodWMiLCJTYW5YdWF0IiwiQ2hpUGhpIiwiTm9QaGFpVGh1IiwiTm9QaGFpVHJhIiwiRmxhc2hTYWxlIiwiVm91Y2hlciIsIkNvbWJvIiwiR3JvdXBvbiIsIkNoaW5oU2FjaE1lbWJlcnNoaXAiLCJUaGVNZW1iZXJzaGlwIiwiVGljaERpZW0iLCJUaWV1RGllbSIsIk5hbmdHaWFuZ0hhbmciLCJCYW9DYW9CYW5IYW5nIiwiUGhhblRpY2hEb2FuaFRodSIsIkJhb0Nhb0tlVG9hbiIsIk5ob21TYW5QaGFtIiwiRGFuaFNhY2hTYW5QaGFtIiwiQ2hpbmhTYWNoR2lhQmFuIiwiTmhvbUluIiwiSW5NYVNhblBoYW0iLCJUYW9NYU5nYXVOaGllbiIsIlRoYW5oVG9hblZOUGF5UVIiLCJNb21vUGF5bWVudCIsIkluZm9QbHVzUGF5bWVudCIsIlZOUFRFUGF5UGF5bWVudCIsIkFsbGlleFBheW1lbnQiLCJUaGFuaFRvYW5WTlBBWVBob25lUE9TU0RLIiwiS2V0Tm9pUVJEb25nQUNCIiwiS2V0Tm9pUVJEb25nVmlldENvbUJhbmsiLCJLZXROb2lRUkRvbmdNQkJhbmsiLCJLZXROb2lRUkRvbmdIREJhbmsiLCJXZWJzaXRlQmFuSGFuZyIsIldlYnNpdGVPcmRlciIsIlphbG9PQSIsIkZhY2Vib29rRmFucGFnZSIsIktldE5vaUV2b3VjaGVyIiwiS2V0Tm9pR2lmdENhcmQiLCJUaWtUb2tTaG9wIiwiQWhhbW92ZSIsIkdyYWJFeHByZXNzIiwiR2lhb0hhbmdUaWV0S2llbSIsIkdpYW9IYW5nTmhhbmgiLCJHcmFiRm9vZCIsIlNob3BlZUZvb2QiLCJBSUNoYXQiLCJUaW5oSGluaEhvYXREb25nS2luaERvYW5oIiwiVGhvbmdLZVh1YXROaGFwVG9uIiwiVGhvbmdLZUJhbkhhbmciLCJUb25nQ2hpUGhpSG9hdERvbmciLCJRdWFuTHlLaHVWdWNCYW4iLCJRdWFuTHlOaGFDdW5nQ2FwIiwiUUxDaGlOaGFuaCIsIlFMVGh1b2NUaW5oIl0sImh0dHA6Ly9zY2hlbWFzLnhtbHNvYXAub3JnL3dzLzIwMDUvMDUvaWRlbnRpdHkvY2xhaW1zL3N5c3RlbSI6IlRyw6Agc-G7r2EgRGFjbyIsIkJyYW5jaElkIjoiNTA5NWQwYmMtNTBjMy00MDIzLTg5ZGYtNjg0M2JjYmVmODlhIiwiaHR0cDovL3NjaGVtYXMueG1sc29hcC5vcmcvd3MvMjAwNS8wNS9pZGVudGl0eS9jbGFpbXMvc3RyZWV0YWRkcmVzcyI6IkRhY28gUGhhbiBYw61jaCBMb25nIG5ob25nIiwiaHR0cDovL3NjaGVtYXMueG1sc29hcC5vcmcvd3MvMjAwNS8wNS9pZGVudGl0eS9jbGFpbXMvaG9tZXBob25lIjoiIiwiaHR0cDovL3NjaGVtYXMueG1sc29hcC5vcmcvd3MvMjAwNS8wNS9pZGVudGl0eS9jbGFpbXMvZW1haWxhZGRyZXNzIjoiIiwiaHR0cDovL3NjaGVtYXMueG1sc29hcC5vcmcvd3MvMjAwNS8wNS9pZGVudGl0eS9jbGFpbXMvd2VicGFnZSI6InRyYXN1YWRhY28uZHliaXdlYi5jb20iLCJleHAiOjE3NTE1MzY0OTIsImlzcyI6Imh0dHBzOi8va2FzLmFzaWEiLCJhdWQiOiJodHRwczovL2xvY2FsaG9zdDoxMjcwMiJ9.Ao8zLfD-7q091SM3CvBa2EDbJG0v8F_O40ABUuyVinU";
+
+axios.get('https://api-demo.posone.vn/api/orders/news?pageNumber=1&pageSize=20', {
+  headers: {
+    // 'accept': '*/*',
+    // 'accept-language': 'vi-VN,vi;q=0.9,fr-FR;q=0.8,fr;q=0.7,en-US;q=0.6,en;q=0.5',
+    // 'origin': 'http://localhost:9993',
+    // 'priority': 'u=1, i',
+    // 'referer': 'http://localhost:9993/',
+    // 'sec-ch-ua': '"Chromium";v="136", "Google Chrome";v="136", "Not.A/Brand";v="99"',
+    // 'sec-ch-ua-mobile': '?0',
+    // 'sec-ch-ua-platform': '"Windows"',
+    // 'sec-fetch-dest': 'empty',
+    // 'sec-fetch-mode': 'cors',
+    // 'sec-fetch-site': 'cross-site',
+    // 'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/136.0.0.0 Safari/537.36',
+    'Content-Type': 'application/json',
+    'Authorization': `Bearer ${token}` // Thay bằng token thực tế
+  }
+})
+.then(response => {
+  console.log(response.data);
+})
+.catch(error => {
+  console.error('Error fetching data:', error);
+});

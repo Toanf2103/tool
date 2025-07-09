@@ -1,0 +1,11 @@
+import pako from 'pako';
+
+const base64data = 'H4sIAAAAAAAACtzWy2oUQRQG4Fdpaj0H6nKqump2QSUEEgxkcCMuTl16pnHSPXT3BEVcuXRjHkBI4lrM2lm4mJD3mCfwFWSMIQqmDRiEcVmn6Asf9f/dXxdfnr5iO5ENGRaRe+s85B49oHIByBIHgzGRSybnHtmA7VOTqm59RTWfTgdsVHbTxIZsu1x9/lBmzyfL0479GO/XLRsyNmDbTT2f7aVqfrV83MTUsKEYsIepDU3p1zdgA7bT7s/badlOUmTDgqZtWs8OaP2Arpl/X22Frjy6WR/SOF2/yoP6cFZXqep2y7ZjQ7bf1HEeupb9tPUwdVRObzbZgD3ZGrEhyAF79GJWN91e6iZ1ZEPxevBDhvNCIioOzpEGLKQGZ2yApKWxZAiFED0yo2Z5krWrxSfKLt4tT8pst6bqXoiuTf6JkL0dKGpPKEMAUeQJUAUHnooEFq3hqDAZpe4GNJosT8ts9558/voIVb8Or2muxt9V9O0qWoYYBQrIhU2A0gjwniMYGaiQ3mgX+wI1apZnVRYmy7P5pmD0HBFr8lgkn4M2yQIqE8CiT0AF5l4Gw10hezAu3lRZuzytxptC0dcnyspCc46gozGAlufgBBEgolDaKKnR3y0uXT2bldU4q8b1BjZKT3a8V6SRK1A2OUDvLRCpAIqkklZYF7m7Y+Uerz5/PMyOVou3/5UQdyo5xzm4qAQgYQTSNoAx1iERae/++FHqmnXbhuXZy82jEbynbIRNTjsPAfO4tnFAAQvAVOTREeVa6B6bg6tsXZ5fnpZro+sazi6OL89Xi/fVOLs4ThsYuJ5+FlwGQZKgIJ4AnScgCgZSQGcCBkJlesj2qAsTyqbUdenqL2dTivo3EXv2DQAA//8DABIZqOQWCwAA'; // GZIP + base64 string
+const binaryString = atob(base64data); // hoặc Buffer ở Node.js
+
+const compressedData = new Uint8Array(
+  binaryString.split('').map((char) => char.charCodeAt(0))
+);
+
+const result = pako.ungzip(compressedData, { to: 'string' });
+console.log(result);

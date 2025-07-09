@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GZIP Decoder</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pako/2.1.0/pako.min.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f5f5f5;
+            min-height: 100vh;
+            box-sizing: border-box;
+        }
+        
+        .container {
+            background-color: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        h1 {
+            color: #333;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        
+        .input-group {
+            margin-bottom: 20px;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: bold;
+            color: #555;
+        }
+        
+        textarea {
+            width: 100%;
+            min-height: 120px;
+            padding: 10px;
+            border: 2px solid #ddd;
+            border-radius: 5px;
+            font-family: monospace;
+            font-size: 14px;
+            resize: vertical;
+            box-sizing: border-box;
+        }
+        
+        button {
+            background-color: #007bff;
+            color: white;
+            padding: 12px 25px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: background-color 0.3s;
+        }
+        
+        button:hover {
+            background-color: #0056b3;
+        }
+        
+        button:disabled {
+            background-color: #ccc;
+            cursor: not-allowed;
+        }
+        
+        .result {
+            margin-top: 20px;
+            padding: 15px;
+            background-color: #f8f9fa;
+            border-left: 4px solid #007bff;
+            border-radius: 5px;
+            white-space: pre-wrap;
+            font-family: monospace;
+            font-size: 14px;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+        
+        .error {
+            background-color: #f8d7da;
+            border-left-color: #dc3545;
+            color: #721c24;
+        }
+        
+        .success {
+            background-color: #d4edda;
+            border-left-color: #28a745;
+            color: #155724;
+        }
+        
+        .example {
+            margin-top: 20px;
+            padding: 15px;
+            background-color: #e9ecef;
+            border-radius: 5px;
+            font-size: 14px;
+        }
+        
+        .example h3 {
+            margin-top: 0;
+            color: #495057;
+        }
+        
+        .example code {
+            background-color: #f8f9fa;
+            padding: 2px 4px;
+            border-radius: 3px;
+            font-family: monospace;
+            word-break: break-all;
+        }
+
+        .result-container {
+            position: relative;
+            margin-top: 20px;
+        }
+        
+        .copy-btn {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background-color: #6c757d;
+            color: white;
+            border: none;
+            border-radius: 3px;
+            padding: 5px 10px;
+            font-size: 12px;
+            cursor: pointer;
+            z-index: 1;
+        }
+        
+        .copy-btn:hover {
+            background-color: #5a6268;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🗜️ GZIP Decoder Tool</h1>
+        
+        <div class="input-group">
+            <label for="gzipInput">Nhập dữ liệu GZIP (Base64):</label>
+            <textarea 
+                id="gzipInput" 
+                placeholder="Dán dữ liệu GZIP đã được mã hóa Base64 vào đây..."
+            ></textarea>
+        </div>
+        
+        <button onclick="decodeGzip()">🔄 Decode GZIP</button>
+        <button onclick="clearAll()">🗑️ Xóa tất cả</button>
+        
+        <div class="result-container">
+            <button class="copy-btn" onclick="copyResult()" style="display: none;">📋 Copy</button>
+            <div id="result"></div>
+        </div>
+    </div>
+
+    <script>
+        function decodeGzip() {
+            const input = document.getElementById('gzipInput').value.trim();
+            const resultDiv = document.getElementById('result');
+            
+            if (!input) {
+                showResult('Vui lòng nhập dữ liệu GZIP!', 'error');
+                return;
+            }
+            
+            try {
+                // Decode base64
+                const binaryString = atob(input);
+                
+                // Convert to Uint8Array
+                const compressedData = new Uint8Array(
+                    binaryString.split('').map((char) => char.charCodeAt(0))
+                );
+                
+                // Decompress using pako
+                const result = pako.ungzip(compressedData, { to: 'string' });
+                
+                // Try to parse as JSON
+                try {
+                    const jsonData = JSON.parse(result);
+                    showResult(JSON.stringify(jsonData, null, 2), 'success');
+                } catch (jsonError) {
+                    // If not valid JSON, show as plain text
+                    showResult(result, 'success');
+                }
+                
+            } catch (error) {
+                showResult('Lỗi khi decode: ' + error.message, 'error');
+            }
+        }
+        
+        function showResult(text, type) {
+            const resultDiv = document.getElementById('result');
+            const copyBtn = document.querySelector('.copy-btn');
+            resultDiv.innerHTML = text;
+            resultDiv.className = 'result ' + type;
+            copyBtn.style.display = text ? 'block' : 'none';
+        }
+        
+        function copyResult() {
+            const resultText = document.getElementById('result').innerText;
+            navigator.clipboard.writeText(resultText).then(() => {
+                const copyBtn = document.querySelector('.copy-btn');
+                const originalText = copyBtn.innerHTML;
+                copyBtn.innerHTML = '✅ Copied!';
+                setTimeout(() => {
+                    copyBtn.innerHTML = originalText;
+                }, 2000);
+            });
+        }
+        
+        function clearAll() {
+            document.getElementById('gzipInput').value = '';
+            document.getElementById('result').innerHTML = '';
+            document.getElementById('result').className = '';
+            document.querySelector('.copy-btn').style.display = 'none';
+        }
+        
+        function copyExample() {
+            const exampleText = 'H4sIAAAAAAAACtzWy2oUQRQG4Fdpaj0H6nKqump2QSUEEgxkcCMuTl16pnHSPXT3BEVcuXRjHkBI4lrM2lm4mJD3mCfwFWSMIQqmDRiEcVmn6Asf9f/dXxdfnr5iO5ENGRaRe+s85B49oHIByBIHgzGRSybnHtmA7VOTqm59RTWfTgdsVHbTxIZsu1x9/lBmzyfL0479GO/XLRsyNmDbTT2f7aVqfrV83MTUsKEYsIepDU3p1zdgA7bT7s/badlOUmTDgqZtWs8OaP2Arpl/X22Frjy6WR/SOF2/yoP6cFZXqep2y7ZjQ7bf1HEeupb9tPUwdVRObzbZgD3ZGrEhyAF79GJWN91e6iZ1ZEPxevBDhvNCIioOzpEGLKQGZ2yApKWxZAiFED0yo2Z5krWrxSfKLt4tT8pst6bqXoiuTf6JkL0dKGpPKEMAUeQJUAUHnooEFq3hqDAZpe4GNJosT8ts9558/voIVb8Or2muxt9V9O0qWoYYBQrIhU2A0gjwniMYGaiQ3mgX+wI1apZnVRYmy7P5pmD0HBFr8lgkn4M2yQIqE8CiT0AF5l4Gw10hezAu3lRZuzytxptC0dcnyspCc46gozGAlufgBBEgolDaKKnR3y0uXT2bldU4q8b1BjZKT3a8V6SRK1A2OUDvLRCpAIqkklZYF7m7Y+Uerz5/PMyOVou3/5UQdyo5xzm4qAQgYQTSNoAx1iERae/++FHqmnXbhuXZy82jEbynbIRNTjsPAfO4tnFAAQvAVOTREeVa6B6bg6tsXZ5fnpZro+sazi6OL89Xi/fVOLs4ThsYuJ5+FlwGQZKgIJ4AnScgCgZSQGcCBkJlesj2qAsTyqbUdenqL2dTivo3EXv2DQAA//8DABIZqOQWCwAA';
+            
+            document.getElementById('gzipInput').value = exampleText;
+            
+            // Show notification
+            const notification = document.createElement('div');
+            notification.textContent = '✅ Đã copy ví dụ vào ô input!';
+            notification.style.cssText = `
+                position: fixed;
+                top: 20px;
+                right: 20px;
+                background-color: #28a745;
+                color: white;
+                padding: 10px 20px;
+                border-radius: 5px;
+                z-index: 1000;
+                font-size: 14px;
+            `;
+            document.body.appendChild(notification);
+            
+            setTimeout(() => {
+                document.body.removeChild(notification);
+            }, 2000);
+        }
+        
+        // Allow Enter key to trigger decode
+        document.getElementById('gzipInput').addEventListener('keydown', function(e) {
+            if (e.ctrlKey && e.key === 'Enter') {
+                decodeGzip();
+            }
+        });
+        
+        // Auto-focus on input
+        document.getElementById('gzipInput').focus();
+    </script>
+</body>
+</html>
