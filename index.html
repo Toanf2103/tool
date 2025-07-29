@@ -1,229 +1,634 @@
 <!DOCTYPE html>
-<html>
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Hóa đơn - 89336762</title>
+<html lang="vi">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="icon" type="image/x-icon" href="./favicon.ico" />
+    <title>GZIP Decoder</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pako/2.1.0/pako.min.js"></script>
     <style>
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+        margin: 0;
+        padding: 15px;
+        background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+        min-height: 100vh;
+        color: #2d3748;
+      }
+
+      .container {
+        background-color: white;
+        padding: 25px;
+        border-radius: 15px;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+        max-width: 1400px;
+        margin: 0 auto;
+        border: 1px solid #e2e8f0;
+      }
+
+      h1 {
+        color: #2d3748;
+        text-align: center;
+        margin-bottom: 30px;
+        font-size: 2.2rem;
+        font-weight: 700;
+        background: linear-gradient(135deg, #4299e1, #3182ce);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+      }
+
+      /* Desktop 2-column layout */
+      .main-content {
+        display: grid;
+        grid-template-columns: 1fr 1.5fr;
+        gap: 30px;
+        align-items: start;
+      }
+
+      .input-section {
+        background-color: #f8fafc;
+        padding: 25px;
+        border-radius: 12px;
+        border: 1px solid #e2e8f0;
+        height: fit-content;
+      }
+
+      .result-section {
+        background-color: #f8fafc;
+        padding: 25px;
+        border-radius: 12px;
+        border: 1px solid #e2e8f0;
+        min-height: 500px;
+      }
+
+      .input-group {
+        margin-bottom: 20px;
+      }
+
+      label {
+        display: block;
+        margin-bottom: 10px;
+        font-weight: 600;
+        color: #4a5568;
+        font-size: 1.1rem;
+      }
+
+      textarea {
+        width: 100%;
+        min-height: 140px;
+        padding: 15px;
+        border: 2px solid #e2e8f0;
+        border-radius: 10px;
+        font-family: "Fira Code", monospace;
+        font-size: 14px;
+        resize: vertical;
+        transition: all 0.3s ease;
+        background-color: white;
+        color: #2d3748;
+      }
+
+      textarea:focus {
+        outline: none;
+        border-color: #4299e1;
+        box-shadow: 0 0 0 3px rgba(66, 153, 225, 0.1);
+      }
+
+      .input-help {
+        color: #718096;
+        font-size: 0.9rem;
+        margin-top: 8px;
+        font-style: italic;
+      }
+
+      .button-group {
+        display: flex;
+        gap: 12px;
+        margin-top: 20px;
+        flex-direction: column;
+      }
+
+      button {
+        background: linear-gradient(135deg, #4299e1, #3182ce);
+        color: white;
+        padding: 15px 25px;
+        border: none;
+        border-radius: 10px;
+        cursor: pointer;
+        font-size: 16px;
+        font-weight: 600;
+        transition: all 0.3s ease;
+        box-shadow: 0 2px 8px rgba(66, 153, 225, 0.3);
+        width: 100%;
+      }
+
+      button:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 4px 12px rgba(66, 153, 225, 0.4);
+      }
+
+      button:active {
+        transform: translateY(0);
+      }
+
+      button:disabled {
+        background: #cbd5e0;
+        cursor: not-allowed;
+        transform: none;
+        box-shadow: none;
+        color: #a0aec0;
+      }
+
+      .clear-btn {
+        background: linear-gradient(135deg, #e53e3e, #c53030);
+        box-shadow: 0 2px 8px rgba(229, 62, 62, 0.3);
+      }
+
+      .clear-btn:hover {
+        box-shadow: 0 4px 12px rgba(229, 62, 62, 0.4);
+      }
+
+      .result-container {
+        position: relative;
+        height: 100%;
+      }
+
+      .result-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 15px;
+      }
+
+      .result-title {
+        font-weight: 600;
+        color: #4a5568;
+        font-size: 1.1rem;
+      }
+
+      .result {
+        padding: 20px;
+        background-color: white;
+        border: 2px solid #e2e8f0;
+        border-radius: 10px;
+        white-space: pre-wrap;
+        font-family: "Fira Code", monospace;
+        font-size: 14px;
+        line-height: 1.6;
+        min-height: 400px;
+        max-height: 65vh;
+        overflow-y: auto;
+        transition: all 0.3s ease;
+        color: #2d3748;
+      }
+
+      .result::-webkit-scrollbar {
+        width: 8px;
+      }
+
+      .result::-webkit-scrollbar-track {
+        background: #f7fafc;
+        border-radius: 4px;
+      }
+
+      .result::-webkit-scrollbar-thumb {
+        background: #cbd5e0;
+        border-radius: 4px;
+      }
+
+      .result::-webkit-scrollbar-thumb:hover {
+        background: #a0aec0;
+      }
+
+      .error {
+        background-color: #fed7d7;
+        border-color: #e53e3e;
+        color: #c53030;
+      }
+
+      .success {
+        background-color: #c6f6d5;
+        border-color: #38a169;
+        color: #2f855a;
+      }
+
+      .copy-btn {
+        background: linear-gradient(135deg, #38a169, #2f855a);
+        color: white;
+        border: none;
+        border-radius: 8px;
+        padding: 8px 16px;
+        font-size: 14px;
+        font-weight: 600;
+        cursor: pointer;
+        box-shadow: 0 2px 8px rgba(56, 161, 105, 0.3);
+        transition: all 0.3s ease;
+      }
+
+      .copy-btn:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 4px 12px rgba(56, 161, 105, 0.4);
+      }
+
+      .empty-state {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        height: 100%;
+        color: #a0aec0;
+        font-size: 1.1rem;
+      }
+
+      .empty-state-icon {
+        font-size: 3rem;
+        margin-bottom: 15px;
+      }
+
+      /* Loading animation */
+      .loading {
+        position: relative;
+        pointer-events: none;
+      }
+
+      .loading::after {
+        content: "";
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        width: 20px;
+        height: 20px;
+        margin: -10px 0 0 -10px;
+        border: 2px solid #4299e1;
+        border-radius: 50%;
+        border-top-color: transparent;
+        animation: spin 1s ease-in-out infinite;
+      }
+
+      @keyframes spin {
+        to {
+          transform: rotate(360deg);
+        }
+      }
+
+      /* Mobile responsive */
+      @media (max-width: 768px) {
         body {
-            margin: 20px; /* Lề hiển thị trên màn hình (không phải lề in) */
-            font-family: Arial, sans-serif;
-            font-size: 14px;
+          padding: 12px;
         }
 
-        h1, h2, h3, p, table {
-            margin: 0;
-            padding: 0;
+        .container {
+          padding: 20px;
+          border-radius: 12px;
         }
 
-        .receipt-container {
-            width: 500px;
-            margin: 0 auto;
-            padding: 10px 20px;
-            border: 1px solid #000;
-            page-break-inside: avoid; /* Tránh ngắt trang giữa chừng */
+        h1 {
+          font-size: 1.9rem;
+          margin-bottom: 25px;
         }
 
-        .receipt-header {
-            text-align: center;
-            margin-bottom: 10px;
+        /* Single column layout */
+        .main-content {
+          display: block;
         }
 
-            .receipt-header h2 {
-                margin: 5px 0;
-                font-weight: bold;
-            }
-
-        .info-section {
-            margin-bottom: 10px;
-            line-height: 1.5em;
+        .input-section {
+          margin-bottom: 25px;
+          padding: 20px;
         }
 
-            .info-section p {
-                margin-bottom: 5px;
-            }
-
-        .customer-info {
-            float: left
+        .result-section {
+          padding: 20px;
+          min-height: 300px;
         }
 
-        .order-info {
-            display: inline-block;
-            vertical-align: top;
-            width: 220px;
-            float: right
+        .button-group {
+          flex-direction: column;
+          gap: 12px;
         }
 
-            .order-info table {
-                width: 100%;
-                border: none;
-            }
-
-            .order-info td {
-                border: none;
-                padding: 0px
-            }
-
-            .order-info tr td:first-child {
-                text-align: left;
-            }
-
-            .order-info tr td:last-child {
-                text-align: right;
-            }
-
-            .customer-info p,
-            .order-info p {
-                margin: 2px 0;
-            }
-
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-bottom: 10px;
+        button {
+          width: 100%;
+          padding: 14px 20px;
+          font-size: 16px;
+          font-weight: 600;
         }
 
-            table thead tr {
-                background: #f3f3f3;
-            }
-
-            table th, table td {
-                border: 1px solid #ccc;
-                padding: 6px;
-                text-align: left;
-            }
-
-        .total-section {
-            float: right;
-            width: 250px;
-            margin-bottom: 10px;
+        textarea {
+          min-height: 120px;
+          font-size: 16px; /* Prevents zoom on iOS */
+          padding: 12px;
         }
 
-            .total-section table {
-                width: 100%;
-                border: none;
-            }
-
-            .total-section td {
-                padding: 4px 0;
-                border: none;
-            }
-
-            .total-section tr td:first-child {
-                text-align: left;
-            }
-
-            .total-section tr td:last-child {
-                text-align: right;
-            }
-
-        .notes {
-            margin-top: 10px;
-            font-style: italic;
+        .result {
+          font-size: 13px;
+          padding: 16px;
+          max-height: 50vh;
+          min-height: 250px;
         }
 
-        .staff {
-            margin-top: 20px;
+        label {
+          font-size: 1rem;
         }
 
-        /* Mỗi khối tách hẳn ra 1 trang */
-        .page-break {
-            page-break-after: always;
+        .result-title {
+          font-size: 1rem;
         }
 
-        @media print {
-            @page {
-                size: A5 portrait; /* Chọn A5 dọc */
-                margin: 10mm; /* Lề 10mm */
-            }
+        .copy-btn {
+          padding: 10px 16px;
+          font-size: 14px;
+        }
+      }
 
-            body {
-                margin: 0;
-                padding: 0;
-            }
-
-            /* Giữ nguyên màu sắc khi in (nếu trình duyệt hỗ trợ) */
-            * {
-                -webkit-print-color-adjust: exact !important;
-                color-adjust: exact !important;
-            }
-
-            .receipt-container {
-                border: none; /* Ẩn viền nếu muốn cho nhẹ nhàng */
-                width: auto;
-                margin: 0;
-                box-shadow: none;
-                page-break-inside: avoid;
-            }
+      @media (max-width: 480px) {
+        body {
+          padding: 8px;
         }
 
+        .container {
+          padding: 16px;
+        }
+
+        h1 {
+          font-size: 1.7rem;
+        }
+
+        .input-section,
+        .result-section {
+          padding: 16px;
+        }
+
+        button {
+          padding: 12px 16px;
+          font-size: 15px;
+        }
+
+        textarea {
+          padding: 10px;
+          font-size: 15px;
+        }
+
+        .result {
+          font-size: 12px;
+          padding: 12px;
+          max-height: 45vh;
+          min-height: 200px;
+        }
+
+        .input-help {
+          font-size: 0.8rem;
+        }
+      }
+
+      /* Large screens optimization */
+      @media (min-width: 1200px) {
+        .container {
+          padding: 35px;
+        }
+
+        .main-content {
+          gap: 40px;
+        }
+
+        .input-section,
+        .result-section {
+          padding: 30px;
+        }
+
+        .result {
+          max-height: 70vh;
+          min-height: 500px;
+        }
+
+        textarea {
+          min-height: 160px;
+        }
+      }
+
+      /* Accessibility improvements */
+      @media (prefers-reduced-motion: reduce) {
+        * {
+          animation-duration: 0.01ms !important;
+          animation-iteration-count: 1 !important;
+          transition-duration: 0.01ms !important;
+        }
+      }
+
+      /* Focus indicators */
+      button:focus-visible {
+        outline: 2px solid #4299e1;
+        outline-offset: 2px;
+      }
+
+      textarea:focus-visible {
+        outline: none;
+      }
     </style>
-</head>
-<body>
-    <div class="receipt-container">
-        <div class="receipt-header">
-            <h3>PHIẾU TẠM TÍNH</h3>
-            <p>Mã đơn hàng: 89336762 | Ngày tạo: 29/07/2025</p>
-        </div>
+  </head>
+  <body>
+    <div class="container">
+      <h1>🗜️ GZIP Decoder Tool</h1>
 
-        <div class="info-section">
-            <div class="customer-info">
-                <strong>Khách hàng:</strong>
-                    Người mua không cung cấp thông tin<br>
-                <p><strong>Số ĐT:</strong> 0000000000</p>
-                <p><strong>Địa chỉ:</strong> </p>
+      <div class="main-content">
+        <!-- Input Column -->
+        <div class="input-section">
+          <div class="input-group">
+            <label for="gzipInput">Nhập dữ liệu GZIP (Base64):</label>
+            <textarea
+              id="gzipInput"
+              placeholder="Dán dữ liệu GZIP đã được mã hóa Base64 vào đây..."
+              aria-describedby="input-help"
+            ></textarea>
+            <div class="input-help" id="input-help">
+              💡 Tip: Nhấn Ctrl + Enter để decode nhanh
             </div>
+          </div>
+
+          <div class="button-group">
+            <button onclick="decodeGzip()" id="decodeBtn">
+              🔄 Decode GZIP
+            </button>
+            <button onclick="clearAll()" class="clear-btn">
+              🗑️ Xóa tất cả
+            </button>
+          </div>
         </div>
 
-        <table>
-            <thead>
-                <tr>
-                    <th>Mô tả</th>
-                    <th>Đơn vị</th>
-                    <th>Số lượng</th>
-                    <th>Đơn giá</th>
-                    <th>Thành tiền</th>
-                </tr>
-            </thead>
-            <tbody>
-                <tr>
-                    <td>Trà bí đao</td>
-                    <td style="text-align:center">lon</td>
-                    <td style="text-align:center">1</td>
-                    <td style="text-align:right">20,000</td>
-                    <td style="text-align:right">20,000</td>
-                </tr>
-                <tr>
-                    <td>Rockstar</td>
-                    <td style="text-align:center">Lon</td>
-                    <td style="text-align:center">1</td>
-                    <td style="text-align:right">31,000</td>
-                    <td style="text-align:right">31,000</td>
-                </tr>
-            </tbody>
-        </table>
-
-        <div class="total-section">
-            <table>
-                <tr>
-                    <td><strong>Tổng tiền hàng:</strong></td>
-                    <td>51,000</td>
-                </tr>
-                <tr>
-                    <td>Tổng phải trả:</td>
-                    <td style="font-weight:600">51,000<sup>đ</sup></td>
-                </tr>
-            </table>
+        <!-- Result Column -->
+        <div class="result-section">
+          <div class="result-container">
+            <div class="result-header">
+              <div class="result-title">Kết quả:</div>
+              <button
+                class="copy-btn"
+                onclick="copyResult()"
+                style="display: none"
+                id="copyBtn"
+              >
+                📋 Copy kết quả
+              </button>
+            </div>
+            <div id="result">
+              <div class="empty-state">
+                <div class="empty-state-icon">📄</div>
+                <div>Kết quả sẽ hiển thị ở đây sau khi decode</div>
+              </div>
+            </div>
+          </div>
         </div>
-        <div style="clear: both;"></div>
-
-        <div class="notes">
-            Lưu ý: Quý khách vui lòng mang biên nhận khi nhận hàng tại: 
-        </div>
-        <div class="staff">
-            <strong>Nhân viên:</strong>  - 
-        </div>
+      </div>
     </div>
-</body>
-</html>
 
+    <script>
+      function decodeGzip() {
+        const input = document.getElementById("gzipInput").value.trim();
+        const resultDiv = document.getElementById("result");
+        const decodeBtn = document.getElementById("decodeBtn");
+
+        if (!input) {
+          showResult("⚠️ Vui lòng nhập dữ liệu GZIP để decode!", "error");
+          return;
+        }
+
+        // Add loading state
+        decodeBtn.classList.add("loading");
+        decodeBtn.disabled = true;
+        decodeBtn.innerHTML = "⏳ Đang xử lý...";
+
+        // Use setTimeout to allow UI to update
+        setTimeout(() => {
+          try {
+            // Decode base64
+            const binaryString = atob(input);
+
+            // Convert to Uint8Array
+            const compressedData = new Uint8Array(
+              binaryString.split("").map((char) => char.charCodeAt(0))
+            );
+
+            // Decompress using pako
+            const result = pako.ungzip(compressedData, { to: "string" });
+
+            // Try to parse as JSON
+            try {
+              const jsonData = JSON.parse(result);
+              showResult(JSON.stringify(jsonData, null, 2), "success");
+            } catch (jsonError) {
+              // If not valid JSON, show as plain text
+              showResult(result, "success");
+            }
+          } catch (error) {
+            showResult("❌ Lỗi khi decode: " + error.message, "error");
+          } finally {
+            // Remove loading state
+            decodeBtn.classList.remove("loading");
+            decodeBtn.disabled = false;
+            decodeBtn.innerHTML = "🔄 Decode GZIP";
+          }
+        }, 100);
+      }
+
+      function showResult(text, type) {
+        const resultDiv = document.getElementById("result");
+        const copyBtn = document.getElementById("copyBtn");
+        resultDiv.innerHTML = text;
+        resultDiv.className = "result " + type;
+        copyBtn.style.display = text ? "inline-block" : "none";
+
+        // Smooth scroll to result on mobile
+        if (window.innerWidth <= 768) {
+          resultDiv.scrollIntoView({ behavior: "smooth", block: "nearest" });
+        }
+      }
+
+      function copyResult() {
+        const resultText = document.getElementById("result").innerText;
+        const copyBtn = document.getElementById("copyBtn");
+
+        navigator.clipboard
+          .writeText(resultText)
+          .then(() => {
+            const originalText = copyBtn.innerHTML;
+            copyBtn.innerHTML = "✅ Đã copy!";
+            copyBtn.style.background =
+              "linear-gradient(135deg, #48bb78, #38a169)";
+
+            setTimeout(() => {
+              copyBtn.innerHTML = originalText;
+              copyBtn.style.background =
+                "linear-gradient(135deg, #38a169, #2f855a)";
+            }, 2000);
+          })
+          .catch(() => {
+            // Fallback for older browsers
+            const textArea = document.createElement("textarea");
+            textArea.value = resultText;
+            document.body.appendChild(textArea);
+            textArea.select();
+            document.execCommand("copy");
+            document.body.removeChild(textArea);
+
+            const originalText = copyBtn.innerHTML;
+            copyBtn.innerHTML = "✅ Đã copy!";
+            setTimeout(() => {
+              copyBtn.innerHTML = originalText;
+            }, 2000);
+          });
+      }
+
+      function clearAll() {
+        if (confirm("Bạn có chắc muốn xóa tất cả dữ liệu?")) {
+          document.getElementById("gzipInput").value = "";
+          const resultDiv = document.getElementById("result");
+          resultDiv.innerHTML = `
+                    <div class="empty-state">
+                        <div class="empty-state-icon">📄</div>
+                        <div>Kết quả sẽ hiển thị ở đây sau khi decode</div>
+                    </div>
+                `;
+          resultDiv.className = "";
+          document.getElementById("copyBtn").style.display = "none";
+          document.getElementById("gzipInput").focus();
+        }
+      }
+
+      // Enhanced keyboard shortcuts
+      document.addEventListener("keydown", function (e) {
+        if (e.ctrlKey && e.key === "Enter") {
+          e.preventDefault();
+          decodeGzip();
+        }
+
+        if (e.ctrlKey && e.key === "k") {
+          e.preventDefault();
+          clearAll();
+        }
+      });
+
+      // Auto-resize textarea
+      const textarea = document.getElementById("gzipInput");
+      textarea.addEventListener("input", function () {
+        this.style.height = "auto";
+        this.style.height = Math.max(140, this.scrollHeight) + "px";
+      });
+
+      // Auto-focus on input when page loads
+      window.addEventListener("load", function () {
+        document.getElementById("gzipInput").focus();
+      });
+
+      // Add paste event listener for better UX
+      textarea.addEventListener("paste", function () {
+        setTimeout(() => {
+          this.style.height = "auto";
+          this.style.height = Math.max(140, this.scrollHeight) + "px";
+        }, 10);
+      });
+    </script>
+  </body>
+</html>
