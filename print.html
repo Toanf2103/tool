@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hóa đơn - 89336762</title>
+    <style>
+        body {
+            margin: 20px; /* Lề hiển thị trên màn hình (không phải lề in) */
+            font-family: Arial, sans-serif;
+            font-size: 14px;
+        }
+
+        h1, h2, h3, p, table {
+            margin: 0;
+            padding: 0;
+        }
+
+        .receipt-container {
+            width: 500px;
+            margin: 0 auto;
+            padding: 10px 20px;
+            border: 1px solid #000;
+            page-break-inside: avoid; /* Tránh ngắt trang giữa chừng */
+        }
+
+        .receipt-header {
+            text-align: center;
+            margin-bottom: 10px;
+        }
+
+            .receipt-header h2 {
+                margin: 5px 0;
+                font-weight: bold;
+            }
+
+        .info-section {
+            margin-bottom: 10px;
+            line-height: 1.5em;
+        }
+
+            .info-section p {
+                margin-bottom: 5px;
+            }
+
+        .customer-info {
+            float: left
+        }
+
+        .order-info {
+            display: inline-block;
+            vertical-align: top;
+            width: 220px;
+            float: right
+        }
+
+            .order-info table {
+                width: 100%;
+                border: none;
+            }
+
+            .order-info td {
+                border: none;
+                padding: 0px
+            }
+
+            .order-info tr td:first-child {
+                text-align: left;
+            }
+
+            .order-info tr td:last-child {
+                text-align: right;
+            }
+
+            .customer-info p,
+            .order-info p {
+                margin: 2px 0;
+            }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 10px;
+        }
+
+            table thead tr {
+                background: #f3f3f3;
+            }
+
+            table th, table td {
+                border: 1px solid #ccc;
+                padding: 6px;
+                text-align: left;
+            }
+
+        .total-section {
+            float: right;
+            width: 250px;
+            margin-bottom: 10px;
+        }
+
+            .total-section table {
+                width: 100%;
+                border: none;
+            }
+
+            .total-section td {
+                padding: 4px 0;
+                border: none;
+            }
+
+            .total-section tr td:first-child {
+                text-align: left;
+            }
+
+            .total-section tr td:last-child {
+                text-align: right;
+            }
+
+        .notes {
+            margin-top: 10px;
+            font-style: italic;
+        }
+
+        .staff {
+            margin-top: 20px;
+        }
+
+        /* Mỗi khối tách hẳn ra 1 trang */
+        .page-break {
+            page-break-after: always;
+        }
+
+        @media print {
+            @page {
+                size: A5 portrait; /* Chọn A5 dọc */
+                margin: 10mm; /* Lề 10mm */
+            }
+
+            body {
+                margin: 0;
+                padding: 0;
+            }
+
+            /* Giữ nguyên màu sắc khi in (nếu trình duyệt hỗ trợ) */
+            * {
+                -webkit-print-color-adjust: exact !important;
+                color-adjust: exact !important;
+            }
+
+            .receipt-container {
+                border: none; /* Ẩn viền nếu muốn cho nhẹ nhàng */
+                width: auto;
+                margin: 0;
+                box-shadow: none;
+                page-break-inside: avoid;
+            }
+        }
+
+    </style>
+</head>
+<body>
+    <div class="receipt-container">
+        <div class="receipt-header">
+            <h3>PHIẾU TẠM TÍNH</h3>
+            <p>Mã đơn hàng: 89336762 | Ngày tạo: 29/07/2025</p>
+        </div>
+
+        <div class="info-section">
+            <div class="customer-info">
+                <strong>Khách hàng:</strong>
+                    Người mua không cung cấp thông tin<br>
+                <p><strong>Số ĐT:</strong> 0000000000</p>
+                <p><strong>Địa chỉ:</strong> </p>
+            </div>
+        </div>
+
+        <table>
+            <thead>
+                <tr>
+                    <th>Mô tả</th>
+                    <th>Đơn vị</th>
+                    <th>Số lượng</th>
+                    <th>Đơn giá</th>
+                    <th>Thành tiền</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>Trà bí đao</td>
+                    <td style="text-align:center">lon</td>
+                    <td style="text-align:center">1</td>
+                    <td style="text-align:right">20,000</td>
+                    <td style="text-align:right">20,000</td>
+                </tr>
+                <tr>
+                    <td>Rockstar</td>
+                    <td style="text-align:center">Lon</td>
+                    <td style="text-align:center">1</td>
+                    <td style="text-align:right">31,000</td>
+                    <td style="text-align:right">31,000</td>
+                </tr>
+            </tbody>
+        </table>
+
+        <div class="total-section">
+            <table>
+                <tr>
+                    <td><strong>Tổng tiền hàng:</strong></td>
+                    <td>51,000</td>
+                </tr>
+                <tr>
+                    <td>Tổng phải trả:</td>
+                    <td style="font-weight:600">51,000<sup>đ</sup></td>
+                </tr>
+            </table>
+        </div>
+        <div style="clear: both;"></div>
+
+        <div class="notes">
+            Lưu ý: Quý khách vui lòng mang biên nhận khi nhận hàng tại: 
+        </div>
+        <div class="staff">
+            <strong>Nhân viên:</strong>  - 
+        </div>
+    </div>
+</body>
+</html>
+
